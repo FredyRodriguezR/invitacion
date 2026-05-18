@@ -51,12 +51,21 @@
   background: var(--gold-light);
 }
 
+html {
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
   overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -65,6 +74,9 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
 }
 
 /* Background overlay gradient and grid lines */
@@ -115,7 +127,7 @@ body {
     opacity: 0.6;
   }
   100% {
-    transform: translateY(-5vh) translateX(100px) scale(1.2) rotate(360deg);
+    transform: translateY(-5vh) translateX(30px) scale(1.2) rotate(360deg);
     opacity: 0;
   }
 }
@@ -1014,5 +1026,18 @@ body {
   .btn-gold, .btn-outline {
     width: 100%;
     justify-content: center;
+  }
+  .music-player-floating {
+    bottom: 16px;
+    right: 16px;
+  }
+  .music-waves {
+    display: none !important;
+  }
+  .bank-details-box {
+    padding: 16px !important;
+  }
+  .bank-detail-value {
+    font-size: 0.9rem !important;
   }
 }
