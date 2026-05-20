@@ -1,36 +1,83 @@
 import { useState, useEffect, useRef } from 'react';
-import { 
-  GraduationCap, 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Copy, 
-  Check, 
-  Volume2, 
-  VolumeX, 
-  Gift, 
-  Heart, 
-  Users, 
+import {
+  GraduationCap,
+  Calendar,
+  Clock,
+  MapPin,
+  Copy,
+  Check,
+  Volume2,
+  VolumeX,
+  Gift,
+  Heart,
+  Users,
   MessageCircle,
-  ExternalLink
+  ExternalLink,
+  Trophy,
+  Mic,
+  Utensils,
+  Award,
+  Music,
+  Smile,
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 // CONFIGURACIÓN DEL EVENTO - Modifica estos valores fácilmente
 const EVENT_CONFIG = {
-  graduateName: "Deyvis",
-  degreeTitle: "Profesional de Excelencia",
-  whatsappNumber: "573000000000", // Código de país + número (ejemplo: 57 para Colombia)
-  graduationDate: "2026-07-17T17:00:00", // Formato ISO para la cuenta regresiva
-  musicUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", // Melodía instrumental elegante
+  graduateName: "Deyvis Steven Claros Molina",
+  degreeTitle: "Licenciatura en Física",
+  whatsappNumber: "573226194417", // Nequi / Número de contacto (Colombia)
+  graduationDate: "2026-06-27T18:30:00", // Formato ISO para la cuenta regresiva (Llegada 6:30 PM)
+  musicUrl: "/Don't Stop 'Til You Get Enough.mp3?v=2", // Canción del website con caché-busting
   bankDetails: {
-    bank: "Banco Davivienda",
-    accountType: "Ahorros",
-    accountNumber: "987-654321-09",
-    owner: "Deyvis Rodríguez",
-    identification: "CC. 123.456.789"
+    nequiNumber: "3226194417",
+    brebKey: "@NEQUIDEY553",
+    owner: "Deyvis Steven Claros"
   }
 };
+
+// Fotos para la galería de recuerdos (optimizadas para web móvil)
+const GALLERY_PHOTOS = [
+  { src: "/photos/D3.jpg", alt: "Recuerdo de graduación 1" },
+  { src: "/photos/D4.jpg", alt: "Recuerdo de graduación 2" },
+  { src: "/photos/D5.jpg", alt: "Recuerdo de graduación 3" },
+  { src: "/photos/D6.jpg", alt: "Recuerdo de graduación 4" },
+  { src: "/photos/D6_1.jpg", alt: "Recuerdo de graduación 5" },
+  { src: "/photos/D7.jpg", alt: "Recuerdo de graduación 6" },
+  { src: "/photos/D9.jpg", alt: "Recuerdo de graduación 7" },
+  { src: "/photos/D10.jpg", alt: "Recuerdo de graduación 8" },
+  { src: "/photos/D11.jpg", alt: "Recuerdo de graduación 9" },
+  { src: "/photos/D12.jpg", alt: "Recuerdo de graduación 10" },
+  { src: "/photos/D13.jpg", alt: "Recuerdo de graduación 11" }
+];
+
+// Componente individual de la galería con soporte para spinner y transición suave
+function GalleryItem({ photo, onClick }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div 
+      className="gallery-item"
+      onClick={onClick}
+    >
+      {!loaded && (
+        <div className="gallery-spinner-container">
+          <div className="gallery-spinner"></div>
+        </div>
+      )}
+      <img
+        src={photo.src}
+        alt={photo.alt}
+        className="gallery-image"
+        style={{ opacity: loaded ? 1 : 0, transition: 'opacity 0.4s ease-in-out' }}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+      />
+    </div>
+  );
+}
 
 function App() {
   // --- Estados ---
@@ -39,10 +86,12 @@ function App() {
   const [name, setName] = useState('');
   const [companions, setCompanions] = useState('0');
   const [message, setMessage] = useState('');
-  const [copied, setCopied] = useState(false);
+  const [copiedType, setCopiedType] = useState(''); // '' | 'nequi' | 'breb'
   const [isPlaying, setIsPlaying] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [particles, setParticles] = useState([]);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(null);
+  const [isLightboxLoading, setIsLightboxLoading] = useState(true);
 
   const audioRef = useRef(null);
 
@@ -84,27 +133,83 @@ function App() {
     setParticles(tempParticles);
   }, []);
 
+  // --- Reproducción Automática con Interacción ---
+  useEffect(() => {
+    let hasPlayed = false;
+
+    const startAudio = () => {
+      if (hasPlayed) return;
+      if (audioRef.current) {
+        audioRef.current.play()
+          .then(() => {
+            setIsPlaying(true);
+            hasPlayed = true;
+            removeListeners();
+          })
+          .catch((err) => {
+            console.log("Autoplay blocked by browser. Awaiting further interaction.", err);
+          });
+      }
+    };
+
+    const removeListeners = () => {
+      document.removeEventListener('click', startAudio);
+      document.removeEventListener('touchstart', startAudio);
+      document.removeEventListener('scroll', startAudio);
+    };
+
+    document.addEventListener('click', startAudio);
+    document.addEventListener('touchstart', startAudio);
+    document.addEventListener('scroll', startAudio);
+
+    return () => removeListeners();
+  }, []);
+
+  // --- Atajos de Teclado para la Galería Lightbox ---
+  useEffect(() => {
+    if (activePhotoIndex === null) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setActivePhotoIndex(null);
+      } else if (e.key === 'ArrowRight') {
+        setActivePhotoIndex((prev) => (prev + 1) % GALLERY_PHOTOS.length);
+      } else if (e.key === 'ArrowLeft') {
+        setActivePhotoIndex((prev) => (prev - 1 + GALLERY_PHOTOS.length) % GALLERY_PHOTOS.length);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activePhotoIndex]);
+
+  // --- Resetear estado de carga al cambiar de foto ---
+  useEffect(() => {
+    setIsLightboxLoading(true);
+  }, [activePhotoIndex]);
+
   // --- Control de Música ---
   const toggleMusic = () => {
     if (!audioRef.current) return;
     if (isPlaying) {
       audioRef.current.pause();
+      setIsPlaying(false);
     } else {
-      audioRef.current.play().catch(err => {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(err => {
         console.log("El navegador bloqueó la reproducción automática al inicio. Se requiere interacción del usuario.", err);
         showToast("💡 Haz clic de nuevo para reproducir la música.");
       });
     }
-    setIsPlaying(!isPlaying);
   };
 
-  // --- Copiar Detalles Bancarios ---
-  const copyToClipboard = () => {
-    const textToCopy = `Banco: ${EVENT_CONFIG.bankDetails.bank}\nTipo: ${EVENT_CONFIG.bankDetails.accountType}\nCuenta: ${EVENT_CONFIG.bankDetails.accountNumber}\nTitular: ${EVENT_CONFIG.bankDetails.owner}\nDocumento: ${EVENT_CONFIG.bankDetails.identification}`;
-    navigator.clipboard.writeText(textToCopy).then(() => {
-      setCopied(true);
-      showToast("✨ ¡Datos de cuenta copiados al portapapeles!");
-      setTimeout(() => setCopied(false), 3000);
+  // --- Copiar Detalles de Pago ---
+  const copyToClipboard = (text, type) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedType(type);
+      showToast(`✨ ¡${type === 'nequi' ? 'Número de Nequi' : 'Llave Bre-B'} copiado al portapapeles!`);
+      setTimeout(() => setCopiedType(''), 3000);
     });
   };
 
@@ -139,7 +244,7 @@ function App() {
     const companionsText = attendance === 'yes' ? `\n*Acompañantes:* ${companions}` : '';
     const wishText = message.trim() ? `\n*Mensaje:* "${message.trim()}"` : '';
 
-    const whatsappMessage = `¡Hola ${EVENT_CONFIG.graduateName}! 👋 Confirmo mi asistencia al evento de tu Graduación 🎓.
+    const whatsappMessage = `¡Hola ${EVENT_CONFIG.graduateName}! 👋 Confirmo mi asistencia a tu Gran Celebración 🥂.
 
 *Nombre:* ${name.trim()}
 *Asistencia:* ${statusText}${companionsText}${wishText}
@@ -163,7 +268,7 @@ function App() {
       {/* Partículas flotantes */}
       <div className="particles-container">
         {particles.map(p => (
-          <div 
+          <div
             key={p.id}
             className="particle"
             style={{
@@ -178,7 +283,7 @@ function App() {
       </div>
 
       {/* REPRODUCTOR DE AUDIO HTML5 */}
-      <audio 
+      <audio
         ref={audioRef}
         src={EVENT_CONFIG.musicUrl}
         loop
@@ -193,7 +298,7 @@ function App() {
           <div className="music-bar"></div>
           <div className="music-bar"></div>
         </div>
-        <button 
+        <button
           className={`music-btn ${isPlaying ? 'playing' : ''}`}
           onClick={toggleMusic}
           title={isPlaying ? "Pausar música de fondo" : "Reproducir música de fondo"}
@@ -221,17 +326,16 @@ function App() {
             Graduación de
           </h2>
           <h1 className="hero-name">{EVENT_CONFIG.graduateName}</h1>
+          <h3 className="serif-title" style={{ letterSpacing: '0.08em', fontSize: '1.4rem', color: 'var(--gold-light)', textTransform: 'uppercase', marginTop: '-0.5rem', marginBottom: '1.5rem', fontWeight: 500 }}>
+            {EVENT_CONFIG.degreeTitle}
+          </h3>
           <p className="hero-desc">
-            Un gran logro merece ser compartido con las personas más especiales. Acompáñame a celebrar la culminación de esta importante etapa y el inicio de un nuevo camino profesional.
+            Un gran logro merece ser compartido con las personas más especiales. Acompáñame a celebrar la culminación de esta importante etapa y el inicio de mi camino profesional en el fascinante mundo de la física.
           </p>
           <a href="#rsvp" className="btn-gold">
             <Heart size={18} fill="currentColor" /> Confirmar Asistencia
           </a>
         </div>
-        <a href="#countdown" className="scroll-indicator">
-          <span>Descubrir más</span>
-          <div className="scroll-mouse"></div>
-        </a>
       </header>
 
       {/* 2. SECCIÓN CUENTA REGRESIVA */}
@@ -270,77 +374,150 @@ function App() {
             <h2 className="section-title">Detalles del Evento</h2>
           </div>
 
-          <div className="details-grid">
-            {/* Ceremonia */}
-            <div className="glass-card details-card">
-              <div className="details-icon-wrapper">
-                <GraduationCap size={32} />
-              </div>
-              <h3>Ceremonia de Grado</h3>
-              <div className="details-divider"></div>
-              <ul className="details-info-list">
-                <li className="details-info-item">
-                  <Calendar size={18} />
-                  <span>Viernes, 17 de Julio de 2026</span>
-                </li>
-                <li className="details-info-item">
-                  <Clock size={18} />
-                  <span>5:00 PM (Hora Exacta)</span>
-                </li>
-                <li className="details-info-item">
-                  <MapPin size={18} />
-                  <div>
-                    <span className="details-place-name">Auditorio Central Universitario</span>
-                    <br />
-                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Av. Universitaria #45-12, Ciudad Principal</span>
-                  </div>
-                </li>
-              </ul>
-              <a 
-                href="https://maps.google.com" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="btn-outline"
-                style={{ marginTop: 'auto' }}
-              >
-                Ver en Google Maps <ExternalLink size={16} />
-              </a>
-            </div>
-
-            {/* Recepción */}
-            <div className="glass-card details-card">
-              <div className="details-icon-wrapper">
+          <div className="details-single-container">
+            <div className="glass-card details-single-card">
+              <div className="details-icon-wrapper" style={{ animation: 'float 4s ease-in-out infinite' }}>
                 <Heart size={32} />
               </div>
               <h3>Recepción & Celebración</h3>
               <div className="details-divider"></div>
-              <ul className="details-info-list">
+              <ul className="details-info-list" style={{ maxWidth: '500px' }}>
                 <li className="details-info-item">
-                  <Calendar size={18} />
-                  <span>Viernes, 17 de Julio de 2026</span>
+                  <Calendar size={20} />
+                  <span>Sábado, 27 de Junio de 2026</span>
                 </li>
                 <li className="details-info-item">
-                  <Clock size={18} />
-                  <span>8:00 PM en adelante</span>
+                  <Clock size={20} />
+                  <span>7:00 PM - 2:30 AM</span>
                 </li>
                 <li className="details-info-item">
-                  <MapPin size={18} />
+                  <MapPin size={20} />
                   <div>
-                    <span className="details-place-name">Salón de Eventos Terraza Dorada</span>
+                    <span className="details-place-name">Salón Comunal de Asovivir</span>
                     <br />
-                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Calle de la Fiesta #12-84, Sector Exclusivo</span>
+                    <span style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>Cl. 68b Sur #80m-49, Bosa, Bogotá</span>
                   </div>
                 </li>
               </ul>
-              <a 
-                href="https://maps.google.com" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="btn-outline"
-                style={{ marginTop: 'auto' }}
+              <a
+                href="https://maps.app.goo.gl/uqFeb9r98BA2hamN7"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-gold"
+                style={{ marginTop: '1rem', padding: '12px 24px' }}
               >
                 Ver en Google Maps <ExternalLink size={16} />
               </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN ITINERARIO */}
+      <section id="itinerary" className="itinerary-section" style={{ background: 'rgba(2, 6, 23, 0.4)' }}>
+        <div className="container">
+          <div className="section-title-container">
+            <p className="cursive-subtitle">¿Qué haremos?</p>
+            <h2 className="section-title">Itinerario del Evento</h2>
+          </div>
+
+          <div className="timeline-container">
+            {/* Item 1 */}
+            <div className="timeline-item">
+              <div className="timeline-icon-box">
+                <Users size={20} />
+              </div>
+              <div className="timeline-content-card">
+                <span className="timeline-time-badge">6:30 PM</span>
+                <h3 className="timeline-title">Llegada & Recibimiento</h3>
+                <p className="timeline-desc">
+                  Bienvenida a los invitados y organización inicial para disfrutar de una noche inolvidable.
+                </p>
+              </div>
+            </div>
+
+            {/* Item 2 */}
+            <div className="timeline-item">
+              <div className="timeline-icon-box">
+                <Trophy size={20} />
+              </div>
+              <div className="timeline-content-card">
+                <span className="timeline-time-badge">7:00 PM - 8:30 PM</span>
+                <h3 className="timeline-title">Inicio de Fiesta / Partido</h3>
+                <p className="timeline-desc">
+                  ¡Que ruede el balón y empiece la diversión! Disfrutaremos del emocionante partido de fútbol de integración y llegada de invitados.
+                </p>
+              </div>
+            </div>
+
+            {/* Item 3 */}
+            <div className="timeline-item">
+              <div className="timeline-icon-box">
+                <Mic size={20} />
+              </div>
+              <div className="timeline-content-card">
+                <span className="timeline-time-badge">8:30 PM - 9:00 PM</span>
+                <h3 className="timeline-title">Palabras Emotivas</h3>
+                <p className="timeline-desc">
+                  Un momento para compartir y brindar por este logro.
+                </p>
+              </div>
+            </div>
+
+            {/* Item 4 */}
+            <div className="timeline-item">
+              <div className="timeline-icon-box">
+                <Utensils size={20} />
+              </div>
+              <div className="timeline-content-card">
+                <span className="timeline-time-badge">9:00 PM - 10:00 PM</span>
+                <h3 className="timeline-title">Comida / Cena</h3>
+                <p className="timeline-desc">
+                  Momento para deleitarnos con una deliciosa cena de celebración y compartir anécdotas en la mesa.
+                </p>
+              </div>
+            </div>
+
+            {/* Item 5 */}
+            <div className="timeline-item">
+              <div className="timeline-icon-box">
+                <Award size={20} />
+              </div>
+              <div className="timeline-content-card">
+                <span className="timeline-time-badge">10:00 PM - 11:00 PM</span>
+                <h3 className="timeline-title">Gran Bingo</h3>
+                <p className="timeline-desc">
+                  ¡A jugar y a ganar! Divertido bingo con fabulosos premios y sorpresas para todos los presentes.
+                </p>
+              </div>
+            </div>
+
+            {/* Item 6 */}
+            <div className="timeline-item">
+              <div className="timeline-icon-box">
+                <Smile size={20} />
+              </div>
+              <div className="timeline-content-card">
+                <span className="timeline-time-badge">11:00 PM - 12:00 AM</span>
+                <h3 className="timeline-title">Actividad de Integración</h3>
+                <p className="timeline-desc">
+                  Momento de risas y juegos para recordar los viejos tiempos.
+                </p>
+              </div>
+            </div>
+
+            {/* Item 7 */}
+            <div className="timeline-item">
+              <div className="timeline-icon-box">
+                <Music size={20} />
+              </div>
+              <div className="timeline-content-card">
+                <span className="timeline-time-badge">12:00 AM - 2:30 AM</span>
+                <h3 className="timeline-title">Súper Fiesta & Baile</h3>
+                <p className="timeline-desc">
+                  ¡A bailar sin parar! Cerramos con broche de oro con música, luces y la mejor energía para celebrar en grande.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -356,18 +533,18 @@ function App() {
 
           <div className="glass-card rsvp-card">
             <p className="rsvp-intro">
-              Por favor, ayúdame a organizar de la mejor manera confirmando tu asistencia antes del <strong>05 de Julio de 2026</strong>. Rellena el formulario y envíame tu confirmación directa por WhatsApp.
+              Por favor, ayúdame a organizar de la mejor manera confirmando tu asistencia antes del <strong>15 de Junio de 2026</strong>. Rellena el formulario y envíame tu confirmación directa por WhatsApp.
             </p>
 
             <form onSubmit={handleRSVPSubmit}>
               {/* Nombre */}
               <div className="form-group">
                 <label className="form-label" htmlFor="guest-name">Nombre Completo</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   id="guest-name"
-                  className="form-input" 
-                  placeholder="Ej. Juan Pérez" 
+                  className="form-input"
+                  placeholder="Ej. Juan Pérez"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -380,10 +557,10 @@ function App() {
                   <label className="form-label">¿Confirmas Asistencia?</label>
                   <div className="attendance-toggle">
                     <div className="toggle-option">
-                      <input 
-                        type="radio" 
-                        id="attendance-yes" 
-                        name="attendance" 
+                      <input
+                        type="radio"
+                        id="attendance-yes"
+                        name="attendance"
                         value="yes"
                         checked={attendance === 'yes'}
                         onChange={() => setAttendance('yes')}
@@ -393,10 +570,10 @@ function App() {
                       </label>
                     </div>
                     <div className="toggle-option">
-                      <input 
-                        type="radio" 
-                        id="attendance-no" 
-                        name="attendance" 
+                      <input
+                        type="radio"
+                        id="attendance-no"
+                        name="attendance"
                         value="no"
                         checked={attendance === 'no'}
                         onChange={() => setAttendance('no')}
@@ -411,7 +588,7 @@ function App() {
                 {/* Acompañantes */}
                 <div className="form-group">
                   <label className="form-label" htmlFor="companions-select">Acompañantes</label>
-                  <select 
+                  <select
                     id="companions-select"
                     className="form-select"
                     value={companions}
@@ -430,10 +607,10 @@ function App() {
               {/* Mensaje */}
               <div className="form-group">
                 <label className="form-label" htmlFor="wishes-textarea">Mensaje de Felicitación (Opcional)</label>
-                <textarea 
+                <textarea
                   id="wishes-textarea"
-                  className="form-textarea" 
-                  placeholder="Escribe tus buenos deseos o felicitaciones aquí..." 
+                  className="form-textarea"
+                  placeholder="Escribe tus buenos deseos o felicitaciones aquí..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
@@ -459,39 +636,13 @@ function App() {
           </div>
 
           <div className="gallery-grid">
-            <div className="gallery-item">
-              <img 
-                src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=600&auto=format&fit=crop" 
-                alt="Celebración del grado" 
-                className="gallery-image"
-                loading="lazy"
+            {GALLERY_PHOTOS.map((photo, index) => (
+              <GalleryItem
+                key={index}
+                photo={photo}
+                onClick={() => setActivePhotoIndex(index)}
               />
-              <div className="gallery-overlay">
-                <span className="gallery-caption">Meta Alcanzada 🎓</span>
-              </div>
-            </div>
-            <div className="gallery-item">
-              <img 
-                src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=600&auto=format&fit=crop" 
-                alt="Graduación y éxito" 
-                className="gallery-image"
-                loading="lazy"
-              />
-              <div className="gallery-overlay">
-                <span className="gallery-caption">Esfuerzo y Pasión ✨</span>
-              </div>
-            </div>
-            <div className="gallery-item">
-              <img 
-                src="https://images.unsplash.com/photo-1525921429573-0aa88b86b973?q=80&w=600&auto=format&fit=crop" 
-                alt="Diploma y toga" 
-                className="gallery-image"
-                loading="lazy"
-              />
-              <div className="gallery-overlay">
-                <span className="gallery-caption">El Comienzo del Futuro 🌟</span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -509,41 +660,50 @@ function App() {
               <Gift size={48} strokeWidth={1.5} />
             </div>
             <p className="gifts-text">
-              Tu presencia y tus felicitaciones son mi mejor regalo para este día. Sin embargo, si deseas hacerme un presente, mi evento contará con la modalidad de <strong>Lluvia de Sobres</strong>. También te facilito mi cuenta bancaria para transferencias en caso de que lo prefieras.
+              Tu presencia y tus felicitaciones son mi mejor regalo para este día. Sin embargo, si deseas hacerme un presente, mi evento contará con la modalidad de <strong>Lluvia de Sobres</strong>. También te facilito mis métodos de pago electrónico para regalos en efectivo en caso de que lo prefieras.
             </p>
 
-            <div className="bank-details-box">
-              <div className="bank-detail-row">
-                <span className="bank-detail-label">Banco</span>
-                <span className="bank-detail-value">{EVENT_CONFIG.bankDetails.bank}</span>
-              </div>
-              <div className="bank-detail-row">
-                <span className="bank-detail-label">Tipo de Cuenta</span>
-                <span className="bank-detail-value">{EVENT_CONFIG.bankDetails.accountType}</span>
-              </div>
-              <div className="bank-detail-row">
-                <span className="bank-detail-label">Número de Cuenta</span>
-                <span className="bank-detail-value">
-                  {EVENT_CONFIG.bankDetails.accountNumber}
-                  <button 
-                    onClick={copyToClipboard}
-                    className="btn-copy"
-                    title="Copiar número de cuenta"
-                  >
-                    {copied ? <Check size={16} strokeWidth={2.5} /> : <Copy size={16} />}
-                  </button>
-                </span>
-              </div>
-              <div className="bank-detail-row">
-                <span className="bank-detail-label">Titular</span>
-                <span className="bank-detail-value">{EVENT_CONFIG.bankDetails.owner}</span>
-              </div>
-              <div className="bank-detail-row">
-                <span className="bank-detail-label">Identificación</span>
-                <span className="bank-detail-value">{EVENT_CONFIG.bankDetails.identification}</span>
+            <div className="bank-details-box" style={{ maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+              <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                <span className="bank-detail-label" style={{ fontSize: '0.9rem', color: 'var(--gold-light)' }}>Titular del Regalo</span>
+                <p style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '4px' }}>{EVENT_CONFIG.bankDetails.owner}</p>
               </div>
 
-              {copied && <span className="copy-toast">¡Copiado! 📋</span>}
+              <div className="payment-grid">
+                {/* Nequi Card */}
+                <div style={{ background: 'rgba(15, 23, 42, 0.4)', border: '1px solid var(--border-light)', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                  <span className="bank-detail-label" style={{ fontSize: '0.75rem' }}>Número Nequi</span>
+                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {EVENT_CONFIG.bankDetails.nequiNumber}
+                    <button
+                      onClick={() => copyToClipboard(EVENT_CONFIG.bankDetails.nequiNumber, 'nequi')}
+                      className="btn-copy"
+                      title="Copiar número Nequi"
+                    >
+                      {copiedType === 'nequi' ? <Check size={16} strokeWidth={2.5} /> : <Copy size={16} />}
+                    </button>
+                  </span>
+                </div>
+
+                {/* Llave Bre-B Card */}
+                <div style={{ background: 'rgba(15, 23, 42, 0.4)', border: '1px solid var(--border-light)', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                  <span className="bank-detail-label" style={{ fontSize: '0.75rem' }}>Llave Bre-B</span>
+                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {EVENT_CONFIG.bankDetails.brebKey}
+                    <button
+                      onClick={() => copyToClipboard(EVENT_CONFIG.bankDetails.brebKey, 'breb')}
+                      className="btn-copy"
+                      title="Copiar Llave Bre-B"
+                    >
+                      {copiedType === 'breb' ? <Check size={16} strokeWidth={2.5} /> : <Copy size={16} />}
+                    </button>
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'center', marginTop: '10px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                <span>📱 Este número de Nequi es también mi contacto de WhatsApp para cualquier duda que tengas.</span>
+              </div>
             </div>
           </div>
         </div>
@@ -564,6 +724,70 @@ function App() {
           </p>
         </div>
       </footer>
+
+      {/* --- Lightbox Modal --- */}
+      {activePhotoIndex !== null && (
+        <div 
+          className="lightbox-modal"
+          onClick={() => setActivePhotoIndex(null)}
+        >
+          <button 
+            className="lightbox-close"
+            onClick={(e) => {
+              e.stopPropagation();
+              setActivePhotoIndex(null);
+            }}
+            aria-label="Cerrar galería"
+          >
+            <X size={24} />
+          </button>
+
+          <button 
+            className="lightbox-nav-btn prev"
+            onClick={(e) => {
+              e.stopPropagation();
+              setActivePhotoIndex((prev) => (prev - 1 + GALLERY_PHOTOS.length) % GALLERY_PHOTOS.length);
+            }}
+            aria-label="Imagen anterior"
+          >
+            <ChevronLeft size={28} />
+          </button>
+
+          <div className="lightbox-container" onClick={(e) => e.stopPropagation()}>
+            <div className="lightbox-image-wrapper" style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {isLightboxLoading && (
+                <div className="lightbox-spinner-container">
+                  <div className="lightbox-spinner"></div>
+                </div>
+              )}
+              <img 
+                src={GALLERY_PHOTOS[activePhotoIndex].src} 
+                alt={GALLERY_PHOTOS[activePhotoIndex].alt} 
+                className="lightbox-image"
+                style={{ opacity: isLightboxLoading ? 0 : 1, transition: 'opacity 0.3s ease-in-out' }}
+                onLoad={() => setIsLightboxLoading(false)}
+              />
+            </div>
+          </div>
+
+          <button 
+            className="lightbox-nav-btn next"
+            onClick={(e) => {
+              e.stopPropagation();
+              setActivePhotoIndex((prev) => (prev + 1) % GALLERY_PHOTOS.length);
+            }}
+            aria-label="Siguiente imagen"
+          >
+            <ChevronRight size={28} />
+          </button>
+
+          <div className="lightbox-caption-panel" onClick={(e) => e.stopPropagation()}>
+            <span className="lightbox-counter">
+              {activePhotoIndex + 1} de {GALLERY_PHOTOS.length}
+            </span>
+          </div>
+        </div>
+      )}
     </>
   );
 }
