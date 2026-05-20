@@ -1042,6 +1042,173 @@ body {
   }
 }
 
+/* ==========================================
+   NEW ITINERARY & SINGLE EVENT DETAILS STYLES
+   ========================================== */
+
+.details-single-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 10px;
+}
+
+.details-single-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.itinerary-section {
+  padding: 80px 0;
+  position: relative;
+}
+
+.timeline-container {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 10px;
+}
+
+.timeline-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 24px;
+  width: 2px;
+  background: linear-gradient(180deg, transparent, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.15), transparent);
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 70px;
+  margin-bottom: 40px;
+  transition: transform 0.3s ease;
+}
+
+.timeline-item:hover {
+  transform: translateX(4px);
+}
+
+.timeline-icon-box {
+  position: absolute;
+  left: 4px;
+  top: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 2px solid var(--gold-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-light);
+  z-index: 2;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.15);
+  transition: all 0.3s ease;
+}
+
+.timeline-item:hover .timeline-icon-box {
+  background: rgba(212, 175, 55, 0.12);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+  transform: scale(1.08);
+}
+
+.timeline-content-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow-premium);
+  transition: all 0.3s ease;
+}
+
+.timeline-item:hover .timeline-content-card {
+  border-color: rgba(212, 175, 55, 0.25);
+  box-shadow: var(--shadow-premium), 0 0 15px rgba(212, 175, 55, 0.08);
+}
+
+.timeline-time-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  background: rgba(212, 175, 55, 0.06);
+  color: var(--gold-light);
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.timeline-item:hover .timeline-time-badge {
+  background: var(--gold-primary);
+  color: #000000;
+  border-color: var(--gold-light);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
+}
+
+.timeline-title {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+
+.timeline-desc {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .timeline-container::before {
+    left: 24px;
+  }
+  
+  .timeline-item {
+    padding-left: 60px;
+    margin-bottom: 35px;
+  }
+  
+  .timeline-icon-box {
+    left: 4px;
+    width: 42px;
+    height: 42px;
+  }
+  
+  .timeline-content-card {
+    padding: 18px;
+  }
+  
+  .timeline-title {
+    font-size: 1.2rem;
+  }
+}
+
+/* Responsive Payment Grid */
+.payment-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .payment-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* 8. Premium Photo Lightbox Modal */
 .lightbox-modal {
   position: fixed;
